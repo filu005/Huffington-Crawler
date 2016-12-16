@@ -37,6 +37,8 @@ public class Consts
 	public static final String FB_COMMENTS_GET_ID = "https://graph.facebook.com/v2.8/?fields=og_object{id},share&id=";
 	public static final String FB_ACCESS_TOKEN = "&access_token=1787348511525222|y--c1m0BFDATTAhxksqrmtuHod8";
 	
+	public static final String HP_ARCHIVE_PAGE = "http://www.huffingtonpost.com/archive/";
+	public static final String HP_ARCHIVE_CLASS = "archive";
 	
 	/**
 	 * Poziom zaglebienia w wyszukiwaniu linkow

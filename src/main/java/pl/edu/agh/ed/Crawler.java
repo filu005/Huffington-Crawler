@@ -1,5 +1,6 @@
 package pl.edu.agh.ed;
 
+import java.util.stream.IntStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -28,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -122,6 +124,11 @@ public class Crawler {
 	 */
 	private static TopicManipulate TopicM = new TopicManipulate(
 			FactoryMaker.getSessionFactory(Topic.class));
+	
+	/**
+	 * Tablica linkow juz dodanych przy rekurencyjnym wyluskiwaniu linkow
+	 */
+	private static ArrayList<String> links_numbers = new ArrayList<String>();
 
 	
 	// --------------------------------------------------------------- Helper Functions
@@ -209,12 +216,12 @@ public class Crawler {
 	 * @param doc
 	 *            dokument
 	 */
-	private static void getAuthor(Author author, Document doc)
+	private static String getAuthor(Author author, Document doc)
 	{
 		for (Element el : doc.getElementsByAttributeValue("class", "author-card__details__name"))
 		{
 			author.setName(el.html());//<span class="author-card__details__name">Sam Stein</span>
-			author.setLink("http://www.huffingtonpost.com" + el.attr("href"));
+			author.setLink(doc.getElementsByAttributeValue("class", "author-card__details__link").attr("abs:href"));
 		}
 		if (author.getName() == null)
 		{
@@ -224,10 +231,10 @@ public class Crawler {
 			for (Element el : doc.getElementsByAttributeValue("class", "wire-byline"))
 			{
 				author.setName(el.text());
-				author.setLink(author.getName());
+				author.setLink(doc.getElementsByAttributeValue("class", "author-card__details__link").attr("abs:href"));
 			}
 		}
-		System.out.println(author.getName());
+		return author.getName();
 	}
 
 	/**
@@ -242,7 +249,7 @@ public class Crawler {
 	{
 		for (Element el : doc.getElementsByAttributeValue("name", "taboola.category"))
 		{
-			System.out.println(el.attr("content"));
+//			System.out.println(el.attr("content"));
 			category.setCategoryName(el.attr("content"));
 		}
 	}
@@ -257,7 +264,7 @@ public class Crawler {
 	 */
 	private static void getContent(Post post, Document doc)
 	{
-		Elements els = doc.getElementsByAttributeValue("class", Consts.CONTENT_CLASS);		
+		Elements els = doc.getElementsByAttributeValue("class", Consts.CONTENT_CLASS);
 		post.setContent(els.text());
 	}
 	
@@ -329,131 +336,40 @@ public class Crawler {
 			System.out.println(u + " / " + sites.size());
 			try
 			{
-				Document doc = Jsoup.connect(link).get();
+				Document doc = Jsoup.connect(link).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36").timeout(0).get();
 				Elements links = doc.select("a[href]");
-				Elements content = doc.select("[content]");
 
 				for (Element url : links)
 				{
 					String urlLink = null;
-					try
+					urlLink = url.attr("abs:href");
+
+					if(urlLink.startsWith("http://www.huffingtonpost.com/entry/"))
 					{
-						urlLink = url.attr("abs:href").substring(0,
-								url.attr("abs:href").lastIndexOf(".html") + 5);
-					}
-					catch (StringIndexOutOfBoundsException e)
-					{
-						continue;
-					}
-					if ((urlLink).startsWith("http://www.politico.com/story/")
-							|| (urlLink.startsWith("http://www.politico.com/news/stories/"))
-							|| (urlLink).startsWith("http://www.politico.com/magazine/story")
-							|| urlLink.startsWith("http://www.huffingtonpost.com/20"))
-					{
-						if (postSet.add(urlLink))
+						Matcher m = Pattern.compile(Consts.PATTERN_GET_SITE_ID).matcher(urlLink);
+						if(m.find() && !links_numbers.contains(m.group(1)))
 						{
-							nextLinks.add(urlLink);
-							PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName,true)));
-							out.println(urlLink);
-							out.close();
-							System.out.println(urlLink + " level " + level
-									+ " HREF" + "( " + numberLink + "/" + sites.size() + ")");
+							System.out.println(" > group > " + m.group(1));
+
+							
+							System.out.println(" > " + urlLink);
+							if (postSet.add(urlLink))
+							{
+								links_numbers.add(m.group(1));
+								nextLinks.add(urlLink);
+								PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName,true)));
+								out.println(urlLink);
+								out.close();
+								System.out.println(urlLink + " level " + level
+										+ " HREF" + "( " + numberLink + "/" + sites.size() + ")");
+							}
 						}
 					}
 				}
-
-				for (Element url : content)
-				{
-					String urlLink = null;
-					try
-					{
-						urlLink = url.attr("abs:content")
-								.substring(0,url.attr("abs:content").lastIndexOf(".html") + 5);
-					}
-					catch (StringIndexOutOfBoundsException e)
-					{
-						continue;
-					}
-					if ((urlLink).startsWith("http://www.politico.com/story/")
-							|| (urlLink
-									.startsWith("http://www.politico.com/news/stories/"))
-							|| (urlLink)
-									.startsWith("http://www.politico.com/magazine/story")
-							|| urlLink
-									.startsWith("http://www.huffingtonpost.com/20"))
-					{
-						if (postSet.add(urlLink))
-						{
-							nextLinks.add(urlLink);
-							PrintWriter out = new PrintWriter(
-									new BufferedWriter(new FileWriter(fileName,
-											true)));
-							out.println(urlLink);
-							out.close();
-							System.out.println(urlLink + " level " + level
-									+ " CONTENT");
-						}
-					}
-				}
-
-				URL url = new URL(link);
-				URLConnection connection = url.openConnection();
-				BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-				String inputLine;
-
-				StringBuilder sb = new StringBuilder();
-
-				while ((inputLine = in.readLine()) != null)
-					sb.append(inputLine);
-				in.close();
-
-				String html = sb.toString();
-				Pattern p = Pattern.compile("href='(.*?)'");
-				Matcher m = p.matcher(html);
-				while (m.find())
-				{
-					if (postSet.add(m.group(1)) && (m.group(1).startsWith("http://www.politico.com/story")
-									|| m.group(1).startsWith("http://www.politico.com/news/stories/")
-									|| m.group(1).startsWith("http://www.politico.com/magazine/")))
-					{
-						PrintWriter out = new PrintWriter(
-								new BufferedWriter(
-										new FileWriter(
-												"files\\TRASH.txt",
-												true)));
-						out.println(m.group(1));
-						out.close();
-						nextLinks.add(m.group(1));
-						System.out.println(m.group(1) + " level " + level);
-					}
-
-				}
-				p = Pattern.compile("content='(.*?)'");
-				m = p.matcher(html);
-				while (m.find())
-				{
-					if (postSet.add(m.group(1))
-							&& (m.group(1).startsWith(
-									"http://www.politico.com/story")
-									|| m.group(1)
-											.startsWith(
-													"http://www.politico.com/news/stories/") || m
-									.group(1)
-									.startsWith(
-											"http://www.politico.com/magazine/"))) {
-						PrintWriter out = new PrintWriter(
-								new BufferedWriter(
-										new FileWriter(
-												"files\\TRASH.txt",
-												true)));
-						out.println(m.group(1));
-						out.close();
-						nextLinks.add(m.group(1));
-						System.out.println(m.group(1) + " level " + level);
-					}
-
-				}
-			} catch (Exception e) {
+			}
+			catch (Exception e)
+			{
+				System.out.println(e.toString());
 				continue;
 			}
 			numberLink++;
@@ -464,6 +380,65 @@ public class Crawler {
 
 		getNewLinks(nextLinks, level, fileName);
 	}
+	
+	private static void getNewLinks_from_archive(String fileName) throws IOException
+	{
+		List<String> nextLinks = new ArrayList<String>();
+		if(nextLinks.isEmpty())
+		{
+			Integer[] years = {2016};
+			Integer[] months_30 = {2, 4, 6, 9, 11};
+			for(int year : years)
+			{
+				IntStream.range(1, 13).forEach( month ->
+				{
+					int no_days = 32;
+					if(Arrays.asList(months_30).contains(month))
+						no_days = 31;
+					if(month == 2)
+						no_days = 30;
+					
+					IntStream.range(1, no_days).forEach( day ->
+					{
+						String starting_link = Consts.HP_ARCHIVE_PAGE + year + "-" + month + "-" + day;
+						System.out.println(starting_link);
+						int numberLink = 1;
+						try
+						{
+							Document doc = Jsoup.connect(starting_link).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36").timeout(0).get();
+							Elements archive_class_els = doc.getElementsByAttributeValue("class", Consts.HP_ARCHIVE_CLASS);
+							Elements links = archive_class_els.select("li").select("a[href]");
+							
+							for (Element url : links)
+							{
+								String urlLink = null;
+								urlLink = url.attr("abs:href");
+
+								if(urlLink.startsWith("http://www.huffingtonpost.com/" + year + "/"))
+								{
+									if (postSet.add(urlLink))
+									{
+										nextLinks.add(urlLink);
+										PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName,true)));
+										out.println(urlLink);
+										out.close();
+										System.out.println(" > " + numberLink + ": " + urlLink);
+									}
+								}
+								numberLink++;
+							}
+						}
+						catch (Exception e)
+						{
+							System.out.println(e.toString());
+						}
+					});
+					
+				});
+				
+			}
+		}
+	}
 
 	/**
 	 * Uzupelnia numer posta
@@ -473,7 +448,8 @@ public class Crawler {
 	 * @param post
 	 *            post
 	 */
-	private static void getSiteNum(String site, Post post) {
+	private static void getSiteNum(String site, Post post)
+	{
 		Matcher m = Pattern.compile(Consts.PATTERN_GET_SITE_ID).matcher(site);
 		while (m.find())
 		{
@@ -629,19 +605,97 @@ public class Crawler {
 //		List<String> sites = Files.readLines(new File(definedLinks),
 //				Charsets.UTF_8);
 //		getNewLinks(sites, 1, savedLinks);
+		
+		/**
+		 * Pobiera linki z archiwum HuffingtonPosta
+		 */
+//		getNewLinks_from_archive("files//archive_links_2016.txt");
+		
+		/**
+		 * Parsuje linki HuffingtonPosta ze starego do nowego ('_us_xnox') formatu
+		 */
+		parse_old_formated_links("files//archive_links_2015.txt", "files//new_links_2015.txt");
 
 		/**
 		 * Zaczytywanie plików które chcemy dodaæ do bazy danych
 		 */
-		List<String> postLinks = Files.readLines(new File(savedLinks), Charsets.UTF_8);
-
-		for (int i = 0; i < postLinks.size(); i += 1)
+//		List<String> postLinks = Files.readLines(new File(savedLinks), Charsets.UTF_8);
+//
+//		for (int i = 0; i < postLinks.size(); i += 1)
+//		{
+//			parsePageAndAddToDB(postLinks.get(i));
+//			System.out.println("DODANO postów " + (i+1) + " z " + postLinks.size());
+//		}
+	}
+	
+	protected static void sleep(int max_seconds)
+	{
+		try
 		{
-			parsePageAndAddToDB(postLinks.get(i));
-			System.out.println("DODANO postów " + (i+1) + " z " + postLinks.size());
+			Thread.sleep((int)(Math.random() * max_seconds * 1000));
+		}
+		catch (Exception ignored) { }
+	}
+	
+	// <meta content="http://www.huffingtonpost.com/entry/x_us_yyy" property="og:url">
+	private static void parse_old_formated_links(String archive_links_file, String us_links_file) throws IOException
+	{
+		List<String> links = Files.readLines(new File(archive_links_file), Charsets.UTF_8);
+		
+		int no_link = 1;
+		for(String link : links)
+		{
+			try
+			{
+				Document doc = Jsoup.connect(link).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36").timeout(10000).get();
+				
+				Elements meta_content = doc.getElementsByAttributeValue("property", "og:url");
+				String us_link = meta_content.attr("content");
+				
+				if(!us_link.isEmpty() && is_politics(doc) && getAuthor(new Author(), doc) != null)
+				{
+					PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(us_links_file,true)));
+					out.println(us_link);
+					out.close();
+				}
+				
+				System.out.println(" > " + no_link + "/" + links.size() + " : " + us_link);
+			}
+			catch(org.jsoup.HttpStatusException e)
+			{
+				if(e.getStatusCode() == 503)
+				{
+					PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("503_error.txt",true)));
+					out.println(e.getUrl());
+					out.close();
+				}
+				else
+				{
+					PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("000_error.txt",true)));
+					out.println(e.toString());
+					out.close();
+				}
+			}
+			catch(Exception e)
+			{
+				System.out.println(e);
+			}
+			++no_link;
+			sleep(2);
 		}
 	}
 
+	// <meta content="Politics" property="article:section">
+	private static boolean is_politics(Document doc)
+	{
+		Elements meta_content = doc.getElementsByAttributeValue("property", "article:section");
+		String article_content_keyword = meta_content.attr("content");
+		System.out.println(article_content_keyword);
+		if(article_content_keyword.equals("Politics"))
+			return true;
+		else
+			return false;
+	}
 	/**
 	 * Parsowanie strony oraz dodanie jej ze wszystkim do bazy danych
 	 * 
@@ -658,7 +712,7 @@ public class Crawler {
 			}
 			
 			Document doc = Jsoup.connect(site).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36").timeout(0).get();
-				
+			
 			// 1
 			Author author = new Author();
 			getAuthor(author, doc);

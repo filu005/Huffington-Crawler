@@ -1,0 +1,7 @@
+org.jsoup.HttpStatusException: HTTP error fetching URL. Status=500, URL=http://www.huffingtonpost.com/2015/11/15/nohemi-gonzalez-vigil_n_8571844.html
+org.jsoup.HttpStatusException: HTTP error fetching URL. Status=500, URL=http://www.huffingtonpost.com/2015/11/15/madonna-speech-paris-attacks-stockholm_n_8569442.html
+org.jsoup.HttpStatusException: HTTP error fetching URL. Status=500, URL=http://www.huffingtonpost.com/2015/11/16/vladimir-putin-consults-with-et_n_8578478.html
+org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=http://www.huffingtonpost.com/entry/heres-how-many-divorc?©s-say-theyve-had-sex-with-their-ex_us_5654a887e4b0258edb3321f8
+org.jsoup.HttpStatusException: HTTP error fetching URL. Status=500, URL=http://www.huffingtonpost.com/2015/11/30/planned-parenthood-shooting-republicans_n_8684850.html
+org.jsoup.HttpStatusException: HTTP error fetching URL. Status=404, URL=http://www.huffingtonpost.com/entry/simon-st??lenhag-robot-paintings_us_565c8445e4b072e9d1c27a96
+org.jsoup.HttpStatusException: HTTP error fetching URL. Status=500, URL=http://www.huffingtonpost.com/2015/12/09/middle-class-not-majority_n_8765790.html
