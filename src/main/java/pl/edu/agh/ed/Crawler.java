@@ -614,18 +614,19 @@ public class Crawler {
 		/**
 		 * Parsuje linki HuffingtonPosta ze starego do nowego ('_us_xnox') formatu
 		 */
-		parse_old_formated_links("files//archive_links_2015.txt", "files//new_links_2015.txt");
+//		parse_old_formated_links("files//archive_links_2016.txt", "files//new_links_2016.txt");
 
 		/**
 		 * Zaczytywanie plików które chcemy dodaæ do bazy danych
 		 */
-//		List<String> postLinks = Files.readLines(new File(savedLinks), Charsets.UTF_8);
-//
-//		for (int i = 0; i < postLinks.size(); i += 1)
-//		{
-//			parsePageAndAddToDB(postLinks.get(i));
-//			System.out.println("DODANO postów " + (i+1) + " z " + postLinks.size());
-//		}
+		List<String> postLinks = Files.readLines(new File(savedLinks), Charsets.UTF_8);
+
+		for (int i = 0; i < postLinks.size(); i += 1)
+		{
+			parsePageAndAddToDB(postLinks.get(i));
+			System.out.println("DODANO postów " + (i+1) + " z " + postLinks.size());
+			sleep(2);
+		}
 	}
 	
 	protected static void sleep(int max_seconds)
@@ -665,13 +666,13 @@ public class Crawler {
 			{
 				if(e.getStatusCode() == 503)
 				{
-					PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("503_error.txt",true)));
+					PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("503_2016_error.txt",true)));
 					out.println(e.getUrl());
 					out.close();
 				}
 				else
 				{
-					PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("000_error.txt",true)));
+					PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("000_2016_error.txt",true)));
 					out.println(e.toString());
 					out.close();
 				}
@@ -700,8 +701,9 @@ public class Crawler {
 	 * Parsowanie strony oraz dodanie jej ze wszystkim do bazy danych
 	 * 
 	 * @param site
+	 * @throws IOException 
 	 */
-	public static void parsePageAndAddToDB(String site)
+	public static void parsePageAndAddToDB(String site) throws IOException
 	{
 		try
 		{
@@ -811,6 +813,21 @@ public class Crawler {
 			// 8+9
 			
 			manage_comments(site, post);
+		}
+		catch(org.jsoup.HttpStatusException e)
+		{
+			if(e.getStatusCode() == 503)
+			{
+				PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("503_2016_error.txt",true)));
+				out.println(e.getUrl());
+				out.close();
+			}
+			else
+			{
+				PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("000_2016_error.txt",true)));
+				out.println(e.toString());
+				out.close();
+			}
 		}
 		catch (IOException e)
 		{
