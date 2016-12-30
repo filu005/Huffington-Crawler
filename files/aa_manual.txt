@@ -1,0 +1,3 @@
+downloaded_links_* - linki ju¿ pobrane
+new_links_* - linki do pobrania (ju¿ bez tych które s¹ w downloaded_*)
+*_fb20 - linki gdzie by³y pobierane reposty tylko do max. 20
