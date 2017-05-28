@@ -16,16 +16,16 @@
 			org.postgresql.Driver
 		</property>
 		<property name="hibernate.connection.url">
-			jdbc:postgresql://localhost:5432/huffington
+			jdbc:postgresql://localhost:5432/s24_db
 		</property>
 		<property name="hibernate.connection.username">
-			postgres
+			s24_user
 		</property>
 		<property name="hibernate.connection.password">
-			postgres
+			s24_pass
 		</property>
 		<property name="connection.pool_size">10</property>
-        <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="hibernate.hbm2ddl.auto">create-drop</property>
         <property name="show_sql">true</property>
 
 		<mapping class="pl.edu.agh.ed.objects.Author" />
@@ -34,8 +34,8 @@
 		<mapping class="pl.edu.agh.ed.objects.Category"/>
 		<mapping class="pl.edu.agh.ed.objects.Comment"/>
 		<mapping class="pl.edu.agh.ed.objects.CommentTopic"/>
-		<mapping class="pl.edu.agh.ed.objects.PostTag"/>
-		<mapping class="pl.edu.agh.ed.objects.PostTopic"/>
+		<!-- <mapping class="pl.edu.agh.ed.objects.PostTag"/>
+		<mapping class="pl.edu.agh.ed.objects.PostTopic"/> -->
 		<mapping class="pl.edu.agh.ed.objects.Tag"/>
 		
 		

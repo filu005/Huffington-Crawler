@@ -6,7 +6,7 @@ public class Main
 {
 	public static void main(String[] args) throws IOException
 	{
-		Crawler.crawl("files\\avoid_links.txt", "files\\defined_links.txt", "files\\new_links_2016.txt");
+		Crawler.crawl("files\\avoid_links.txt", "files\\defined_links.txt", "files\\najnowszenotki.txt");
 		
 		System.out.println("END.\n");
 	}

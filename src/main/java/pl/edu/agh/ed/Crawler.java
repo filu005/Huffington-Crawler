@@ -91,8 +91,8 @@ public class Crawler {
 	/**
 	 * Fabryka polaczen do tabeli lacznikowej komentarz a topic
 	 */
-	private static CommentTopicManipulate CTopicM = new CommentTopicManipulate(
-			FactoryMaker.getSessionFactory(CommentTopic.class));
+//	private static CommentTopicManipulate CTopicM = new CommentTopicManipulate(
+//			FactoryMaker.getSessionFactory(CommentTopic.class));
 
 	/**
 	 * Fabryka polaczen do tabeli postow
@@ -107,13 +107,13 @@ public class Crawler {
 	/**
 	 * Fabryka polaczen do tabeli lacznikowej post a tag
 	 */
-	private static PostTagManipulate PTM = new PostTagManipulate(
-			FactoryMaker.getSessionFactory(PostTag.class));
+//	private static PostTagManipulate PTM = new PostTagManipulate(
+//			FactoryMaker.getSessionFactory(PostTag.class));
 	/**
 	 * Fabryka polaczen do tabeli lacznikowej post a topic
 	 */
-	private static PostTopicManipulate PTopicM = new PostTopicManipulate(
-			FactoryMaker.getSessionFactory(PostTopic.class));
+//	private static PostTopicManipulate PTopicM = new PostTopicManipulate(
+//			FactoryMaker.getSessionFactory(PostTopic.class));
 	/**
 	 * Fabryka polaczen do tabeli tagow
 	 */
@@ -218,22 +218,22 @@ public class Crawler {
 	 */
 	private static String getAuthor(Author author, Document doc)
 	{
-		for (Element el : doc.getElementsByAttributeValue("class", "author-card__details__name"))
+		for (Element el : doc.getElementsByAttributeValue("class", "bloger-name"))
 		{
 			author.setName(el.html());//<span class="author-card__details__name">Sam Stein</span>
-			author.setLink(doc.getElementsByAttributeValue("class", "author-card__details__link").attr("abs:href"));
+			author.setLink(doc.getElementsByAttributeValue("class", "bloger-name").attr("abs:href"));
 		}
-		if (author.getName() == null)
-		{
-			//<div class="wire-byline">
-			//<span>Roberta Rampton and Steve Holland</span>
-			//</div>
-			for (Element el : doc.getElementsByAttributeValue("class", "wire-byline"))
-			{
-				author.setName(el.text());
-				author.setLink(doc.getElementsByAttributeValue("class", "author-card__details__link").attr("abs:href"));
-			}
-		}
+//		if (author.getName() == null)
+//		{
+//			//<div class="wire-byline">
+//			//<span>Roberta Rampton and Steve Holland</span>
+//			//</div>
+//			for (Element el : doc.getElementsByAttributeValue("class", "wire-byline"))
+//			{
+//				author.setName(el.text());
+//				author.setLink(doc.getElementsByAttributeValue("class", "author-card__details__link").attr("abs:href"));
+//			}
+//		}
 		return author.getName();
 	}
 
@@ -247,10 +247,16 @@ public class Crawler {
 	 */
 	private static void getCategory(Category category, Document doc)
 	{
-		for (Element el : doc.getElementsByAttributeValue("name", "taboola.category"))
+		for (Element el : doc.getElementsByAttributeValue("class", "breadcrumb"))
 		{
+			Matcher m = Pattern.compile(Consts.PATTERN_GET_CATEGORY_S24).matcher(el.text());
+			if (m.find())
+			{
+				System.out.println(m.group(1));
+				category.setCategoryName(m.group(1));
+			}
 //			System.out.println(el.attr("content"));
-			category.setCategoryName(el.attr("content"));
+//			category.setCategoryName(el.text());//attr("content")
 		}
 	}
 
@@ -265,7 +271,12 @@ public class Crawler {
 	private static void getContent(Post post, Document doc)
 	{
 		Elements els = doc.getElementsByAttributeValue("class", Consts.CONTENT_CLASS);
-		post.setContent(els.text());
+		String content = "";
+		for (Element el : els)
+		{
+			content += el.select("p").text();
+		}
+		post.setContent(content);
 	}
 	
 	private static void getTags(Post post, Document doc)
@@ -296,15 +307,15 @@ public class Crawler {
 			PostTag postTag = new PostTag();
 			postTag.setPost_id(post);
 			postTag.setTag_id(tag);
-			PTM.addPostTag(postTag);
+//			PTM.addPostTag(postTag);
 		}
 	}
 
 	private static void getDate(Post post, Document doc) throws ParseException
 	{
-		for (Element el : doc.getElementsByClass("timestamp__date--published"))
+		for (Element el : doc.getElementsByClass("created"))
 		{
-			DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm");//yyyy-MM-dd'T'HH:mm:ssXXX
+			DateFormat df = new SimpleDateFormat("dd MMMMM yyyy 'r.'");//yyyy-MM-dd'T'HH:mm:ssXXX	| MM/dd/yyyy HH:mm
 			post.setDate(df.parse(el.text()));
 			System.out.println(post.getDate());
 		}
@@ -381,6 +392,51 @@ public class Crawler {
 		getNewLinks(nextLinks, level, fileName);
 	}
 	
+	private static void getNewLinks_from_s24_najnowszeNotki(String fileName) throws IOException
+	{
+		List<String> nextLinks = new ArrayList<String>();
+		if(nextLinks.isEmpty())
+		{
+			for(int najNotki_currPage = Consts.S24_NAJNOWSZENOTKI_START_PAGEID; najNotki_currPage > 0; --najNotki_currPage)
+			{
+				String starting_link = Consts.S24_NAJNOWSZENOTKI_PAGE + najNotki_currPage;
+				System.out.println(starting_link);
+				int numberLink = 1;
+				try
+				{
+					Document doc = Jsoup.connect(starting_link).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36").timeout(0).get();
+					Elements archive_class_els = doc.getElementsByAttributeValue("class", Consts.S24_NAJNOWSZENOTKI_CLASS);
+					Elements links = archive_class_els.select("a[href]");
+					
+					for (Element url : links)
+					{
+						String urlLink = null;
+						urlLink = url.attr("abs:href");
+						System.out.println(urlLink);
+
+						if(urlLink.contains(".salon24.pl"))
+						{
+							if (postSet.add(urlLink))
+							{
+								nextLinks.add(urlLink);
+								PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName,true)));
+								out.println(urlLink);
+								out.close();
+								System.out.println(" > " + numberLink + ": " + urlLink);
+							}
+						}
+						numberLink++;
+					}
+				}
+				catch (Exception e)
+				{
+					System.out.println(e.toString());
+				}
+			}
+			
+		}
+	}
+	
 	private static void getNewLinks_from_archive(String fileName) throws IOException
 	{
 		List<String> nextLinks = new ArrayList<String>();
@@ -450,7 +506,7 @@ public class Crawler {
 	 */
 	private static void getSiteNum(String site, Post post)
 	{
-		Matcher m = Pattern.compile(Consts.PATTERN_GET_SITE_ID).matcher(site);
+		Matcher m = Pattern.compile(Consts.PATTERN_GET_SITE_ID_S24).matcher(site);
 		while (m.find())
 		{
 			System.out.println(m.group(1));
@@ -468,7 +524,7 @@ public class Crawler {
 	 */
 	private static void getTitle(Post post, Document doc)
 	{
-		Elements els = doc.getElementsByClass(Consts.TITLE_CLASS);
+		Elements els = doc.getElementsByClass(Consts.TITLE_CLASS).select("header > h1");
 		for (Element el : els)
 		{
 			System.out.println(el.text());
@@ -554,7 +610,7 @@ public class Crawler {
 		CommentTopic commentTopic = new CommentTopic();
 		commentTopic.setComment_id(comment);
 		commentTopic.setTopic_id(topic);
-		CTopicM.addCommentTopic(commentTopic);
+//		CTopicM.addCommentTopic(commentTopic);
 	}
 	
 	private static JSONArray get_JSONArray_form_comment_block_id(String comment_block_id) throws JSONException, IOException
@@ -611,6 +667,8 @@ public class Crawler {
 		 */
 //		getNewLinks_from_archive("files//archive_links_2016.txt");
 		
+//		getNewLinks_from_s24_najnowszeNotki("files//najnowszenotki.txt");
+		
 		/**
 		 * Parsuje linki HuffingtonPosta ze starego do nowego ('_us_xnox') formatu
 		 */
@@ -625,15 +683,15 @@ public class Crawler {
 		{
 			parsePageAndAddToDB(postLinks.get(i));
 			System.out.println("DODANO postów " + (i+1) + " z " + postLinks.size());
-			sleep(2);
+			sleep(2000);
 		}
 	}
 	
-	protected static void sleep(int max_seconds)
+	protected static void sleep(int max_milliseconds)
 	{
 		try
 		{
-			Thread.sleep((int)(Math.random() * max_seconds * 1000));
+			Thread.sleep((int)(Math.random() * max_milliseconds));
 		}
 		catch (Exception ignored) { }
 	}
@@ -781,33 +839,33 @@ public class Crawler {
 			}
 
 			// 4 + 5
-			getTags(post, doc);
+//			getTags(post, doc);
 			
 			// 6 + 7
-			Topic topic = new Topic();
-			topic.setKeywords(countWords(post.getContent()));
-			Topic findedTopic = TopicM.getTopicByName(topic.getKeywords());
-			if (findedTopic != null)
-			{
-				topic = findedTopic;
-			}
-			else
-			{
-				if (topic.getKeywords() == null)
-				{
-					System.err.println("Topic jest pusty!!!");
-				}
-				TopicM.addTopic(topic);
-				if (topic.getId() == 0) {
-					System.err.println("Topic nie zapisal sie!!!");
-					return;
-				}
-			}
+//			Topic topic = new Topic();
+//			topic.setKeywords(countWords(post.getContent()));
+//			Topic findedTopic = TopicM.getTopicByName(topic.getKeywords());
+//			if (findedTopic != null)
+//			{
+//				topic = findedTopic;
+//			}
+//			else
+//			{
+//				if (topic.getKeywords() == null)
+//				{
+//					System.err.println("Topic jest pusty!!!");
+//				}
+//				TopicM.addTopic(topic);
+//				if (topic.getId() == 0) {
+//					System.err.println("Topic nie zapisal sie!!!");
+//					return;
+//				}
+//			}
 
-			PostTopic postTopic = new PostTopic();
-			postTopic.setPost_id(post);
-			postTopic.setTopic_id(topic);
-			PTopicM.addPostTopic(postTopic);
+//			PostTopic postTopic = new PostTopic();
+//			postTopic.setPost_id(post);
+//			postTopic.setTopic_id(topic);
+//			PTopicM.addPostTopic(postTopic);
 			
 			// Komentarze FB
 			// 8+9

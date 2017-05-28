@@ -21,8 +21,8 @@ public class Topic implements Serializable {
 	/**
 	 * Komentarze topika
 	 */
-	@OneToMany
-	private Set<CommentTopic> commentTopics;
+//	@OneToMany
+//	private Set<CommentTopic> commentTopics;
 
 	/**
 	 * ID topika
@@ -41,12 +41,12 @@ public class Topic implements Serializable {
 	/**
 	 * Posty topika
 	 */
-	@OneToMany
-	private Set<PostTopic> postTopics;
+//	@OneToMany
+//	private Set<PostTopic> postTopics;
 
-	public Set<CommentTopic> getCommentTopics() {
-		return commentTopics;
-	}
+//	public Set<CommentTopic> getCommentTopics() {
+//		return commentTopics;
+//	}
 
 	public int getId() {
 		return id;
@@ -56,13 +56,13 @@ public class Topic implements Serializable {
 		return keywords;
 	}
 
-	public Set<PostTopic> getPostTopics() {
-		return postTopics;
-	}
+//	public Set<PostTopic> getPostTopics() {
+//		return postTopics;
+//	}
 
-	public void setCommentTopics(Set<CommentTopic> commentTopics) {
-		this.commentTopics = commentTopics;
-	}
+//	public void setCommentTopics(Set<CommentTopic> commentTopics) {
+//		this.commentTopics = commentTopics;
+//	}
 
 	public void setId(int id) {
 		this.id = id;
@@ -72,7 +72,7 @@ public class Topic implements Serializable {
 		this.keywords = keywords;
 	}
 
-	public void setPostTopics(Set<PostTopic> postTopics) {
-		this.postTopics = postTopics;
-	}
+//	public void setPostTopics(Set<PostTopic> postTopics) {
+//		this.postTopics = postTopics;
+//	}
 }

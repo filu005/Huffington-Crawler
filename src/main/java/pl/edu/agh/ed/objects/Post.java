@@ -37,8 +37,8 @@ public class Post {
 	/**
 	 * Komentarze do posta
 	 */
-	@OneToMany
-	private Set<Comment> comments;
+//	@OneToMany
+//	private Set<Comment> comments;
 
 	/**
 	 * Tresc posta; columnDefinition albo Lob
@@ -69,14 +69,14 @@ public class Post {
 	/**
 	 * Tagi posta
 	 */
-	@OneToMany
-	private Set<PostTag> postTags;
+//	@OneToMany
+//	private Set<PostTag> postTags;
 
 	/**
 	 * Topici posta
 	 */
-	@OneToMany
-	private Set<PostTopic> postTopics;
+//	@OneToMany
+//	private Set<PostTopic> postTopics;
 
 	/**
 	 * Unikatowe id posta
@@ -107,9 +107,9 @@ public class Post {
 		return category;
 	}
 
-	public Set<Comment> getComments() {
-		return comments;
-	}
+//	public Set<Comment> getComments() {
+//		return comments;
+//	}
 
 	public String getContent() {
 		return content;
@@ -127,13 +127,13 @@ public class Post {
 		return link;
 	}
 
-	public Set<PostTag> getPostTags() {
-		return postTags;
-	}
+//	public Set<PostTag> getPostTags() {
+//		return postTags;
+//	}
 
-	public Set<PostTopic> getPostTopics() {
-		return postTopics;
-	}
+//	public Set<PostTopic> getPostTopics() {
+//		return postTopics;
+//	}
 
 	public String getSite() {
 		return site;
@@ -155,9 +155,9 @@ public class Post {
 		this.category = category;
 	}
 
-	public void setComments(Set<Comment> comments) {
-		this.comments = comments;
-	}
+//	public void setComments(Set<Comment> comments) {
+//		this.comments = comments;
+//	}
 
 	public void setContent(String content) {
 		this.content = content;
@@ -175,13 +175,13 @@ public class Post {
 		this.link = link;
 	}
 
-	public void setPostTags(Set<PostTag> postTags) {
-		this.postTags = postTags;
-	}
+//	public void setPostTags(Set<PostTag> postTags) {
+//		this.postTags = postTags;
+//	}
 
-	public void setPostTopics(Set<PostTopic> postTopics) {
-		this.postTopics = postTopics;
-	}
+//	public void setPostTopics(Set<PostTopic> postTopics) {
+//		this.postTopics = postTopics;
+//	}
 
 	public void setSite(String string) {
 		this.site = string;

@@ -34,8 +34,8 @@ public class Tag {
 	/**
 	 * Posty taga
 	 */
-	@OneToMany
-	private Set<PostTag> postTags;
+//	@OneToMany
+//	private Set<PostTag> postTags;
 
 	public int getId() {
 		return id;
@@ -45,9 +45,9 @@ public class Tag {
 		return name;
 	}
 
-	public Set<PostTag> getPostTags() {
-		return postTags;
-	}
+//	public Set<PostTag> getPostTags() {
+//		return postTags;
+//	}
 
 	public void setId(int id) {
 		this.id = id;
@@ -57,7 +57,7 @@ public class Tag {
 		this.name = name;
 	}
 
-	public void setPostTags(Set<PostTag> postTags) {
-		this.postTags = postTags;
-	}
+//	public void setPostTags(Set<PostTag> postTags) {
+//		this.postTags = postTags;
+//	}
 }

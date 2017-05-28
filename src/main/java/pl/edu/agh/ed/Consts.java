@@ -18,14 +18,14 @@ public class Consts
 	/**
 	 * ID html-taga do tresci posta
 	 */
-	public static final String CONTENT_CLASS = "content-list-component text";
+	public static final String CONTENT_CLASS = "article-content";
 	
 	public static final String TAGS_CLASS = "tag";
 
 	/**
 	 * Nazwa html-klasy do tytulu
 	 */
-	public static final String TITLE_CLASS = "headline__title";
+	public static final String TITLE_CLASS = "article";
 
 	/**
 	 * Koniec linka do pobierania komentarzy
@@ -39,6 +39,10 @@ public class Consts
 	
 	public static final String HP_ARCHIVE_PAGE = "http://www.huffingtonpost.com/archive/";
 	public static final String HP_ARCHIVE_CLASS = "archive";
+	
+	public static final int S24_NAJNOWSZENOTKI_START_PAGEID = 1684;
+	public static final String S24_NAJNOWSZENOTKI_PAGE = "http://www.salon24.pl/najnowsze/";
+	public static final String S24_NAJNOWSZENOTKI_CLASS = "content";
 	
 	/**
 	 * Poziom zaglebienia w wyszukiwaniu linkow
@@ -54,4 +58,6 @@ public class Consts
 	 * Szablon do wyciagniecia numeru posta
 	 */
 	public static final String PATTERN_GET_SITE_ID = "\\_us\\_([0-9a-z]+)";
+	public static final String PATTERN_GET_SITE_ID_S24 = "salon24.pl\\/([0-9]+)";
+	public static final String PATTERN_GET_CATEGORY_S24 = "Dzia³: ([A-Za-z\u0080-\u9fff]+)";
 }

@@ -23,8 +23,8 @@ public class Author implements Serializable {
 	/**
 	 * Komentarze autora
 	 */
-	@OneToMany
-	private Set<Comment> comments;
+//	@OneToMany
+//	private Set<Comment> comments;
 
 	/**
 	 * ID autora
@@ -49,8 +49,8 @@ public class Author implements Serializable {
 	/**
 	 * Posty autora
 	 */
-	@OneToMany
-	private Set<Post> posts;
+//	@OneToMany
+//	private Set<Post> posts;
 	
 	/**
 	 * ID autora z FB
@@ -90,9 +90,9 @@ public class Author implements Serializable {
 		return name;
 	}
 
-	public Set<Post> getPosts() {
-		return posts;
-	}
+//	public Set<Post> getPosts() {
+//		return posts;
+//	}
 
 	public void setId(int id) {
 		this.id = id;
@@ -110,8 +110,8 @@ public class Author implements Serializable {
 		this.name = name;
 	}
 
-	public void setPosts(Set<Post> posts) {
-		this.posts = posts;
-	}
+//	public void setPosts(Set<Post> posts) {
+//		this.posts = posts;
+//	}
 
 }

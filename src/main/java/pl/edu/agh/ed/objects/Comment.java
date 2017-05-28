@@ -38,8 +38,8 @@ public class Comment implements Serializable {
 	/**
 	 * Topici komentarza
 	 */
-	@OneToMany
-	private Set<CommentTopic> commentTopics;
+//	@OneToMany
+//	private Set<CommentTopic> commentTopics;
 
 	/**
 	 * Tresc
@@ -88,9 +88,9 @@ public class Comment implements Serializable {
 		return comment;
 	}
 
-	public Set<CommentTopic> getCommentTopics() {
-		return commentTopics;
-	}
+//	public Set<CommentTopic> getCommentTopics() {
+//		return commentTopics;
+//	}
 
 	public String getContent() {
 		return content;
@@ -128,9 +128,9 @@ public class Comment implements Serializable {
 		this.comment = comment;
 	}
 
-	public void setCommentTopics(Set<CommentTopic> commentTopics) {
-		this.commentTopics = commentTopics;
-	}
+//	public void setCommentTopics(Set<CommentTopic> commentTopics) {
+//		this.commentTopics = commentTopics;
+//	}
 
 	public void setContent(String content) {
 		this.content = content;
