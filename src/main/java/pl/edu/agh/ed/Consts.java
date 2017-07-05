@@ -34,15 +34,20 @@ public class Consts
 	// + comment_block_id
 	public static final String FB_COMMENTS_END = "/comments?summary=1&limit=10000";
 	
+	public static final String S24_COMMENTS_START = "http://www.salon24.pl/comments-api/comments?sourceId=Post-";
+	public static final String S24_COMMENTS_END = "&sort=NEWEST&limit=1500";
+	
 	public static final String FB_COMMENTS_GET_ID = "https://graph.facebook.com/v2.8/?fields=og_object{id},share&id=";
 	public static final String FB_ACCESS_TOKEN = "&access_token=1787348511525222|y--c1m0BFDATTAhxksqrmtuHod8";
 	
 	public static final String HP_ARCHIVE_PAGE = "http://www.huffingtonpost.com/archive/";
 	public static final String HP_ARCHIVE_CLASS = "archive";
 	
-	public static final int S24_NAJNOWSZENOTKI_START_PAGEID = 1684;
+	public static final int S24_NAJNOWSZENOTKI_START_PAGEID = 3135;
+	public static final int S24_NAJNOWSZENOTKI_STOP_PAGEID = 1684;
 	public static final String S24_NAJNOWSZENOTKI_PAGE = "http://www.salon24.pl/najnowsze/";
 	public static final String S24_NAJNOWSZENOTKI_CLASS = "content";
+	public static final String S24_COMMENTS_CLASS = "comments";
 	
 	/**
 	 * Poziom zaglebienia w wyszukiwaniu linkow
@@ -60,4 +65,5 @@ public class Consts
 	public static final String PATTERN_GET_SITE_ID = "\\_us\\_([0-9a-z]+)";
 	public static final String PATTERN_GET_SITE_ID_S24 = "salon24.pl\\/([0-9]+)";
 	public static final String PATTERN_GET_CATEGORY_S24 = "Dzia³: ([A-Za-z\u0080-\u9fff]+)";
+	public static final String PATTERN_GET_POST_DATE_S24 = "Opublikowano: ([0-9\\.\\:\\s]+)";
 }

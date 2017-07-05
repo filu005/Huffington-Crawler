@@ -315,9 +315,15 @@ public class Crawler {
 	{
 		for (Element el : doc.getElementsByClass("created"))
 		{
-			DateFormat df = new SimpleDateFormat("dd MMMMM yyyy 'r.'");//yyyy-MM-dd'T'HH:mm:ssXXX	| MM/dd/yyyy HH:mm
-			post.setDate(df.parse(el.text()));
-			System.out.println(post.getDate());
+			Matcher m = Pattern.compile(Consts.PATTERN_GET_POST_DATE_S24).matcher(el.text());
+			if (m.find())
+			{
+				DateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm");//yyyy-MM-dd'T'HH:mm:ssXXX	| MM/dd/yyyy HH:mm
+				post.setDate(df.parse(m.group(1)));
+				System.out.println(post.getDate());
+			}
+			
+			
 		}
 	}
 
@@ -397,7 +403,7 @@ public class Crawler {
 		List<String> nextLinks = new ArrayList<String>();
 		if(nextLinks.isEmpty())
 		{
-			for(int najNotki_currPage = Consts.S24_NAJNOWSZENOTKI_START_PAGEID; najNotki_currPage > 0; --najNotki_currPage)
+			for(int najNotki_currPage = Consts.S24_NAJNOWSZENOTKI_START_PAGEID; najNotki_currPage > Consts.S24_NAJNOWSZENOTKI_STOP_PAGEID; --najNotki_currPage)
 			{
 				String starting_link = Consts.S24_NAJNOWSZENOTKI_PAGE + najNotki_currPage;
 				System.out.println(starting_link);
@@ -648,11 +654,11 @@ public class Crawler {
 		/**
 		 * Lista linków ktore chcemy pominac zaczytywane z pliku
 		 */
-		List<String> old = Files.readLines(new File(avoidLinks), Charsets.UTF_8);
-		for (String a : old)
-		{
-			postSet.add(a);
-		}
+//		List<String> old = Files.readLines(new File(avoidLinks), Charsets.UTF_8);
+//		for (String a : old)
+//		{
+//			postSet.add(a);
+//		}
 
 		/**
 		 * Zdefiniowane linki z których chcemy pozyskac nowe, które zostaj¹
@@ -667,7 +673,7 @@ public class Crawler {
 		 */
 //		getNewLinks_from_archive("files//archive_links_2016.txt");
 		
-//		getNewLinks_from_s24_najnowszeNotki("files//najnowszenotki.txt");
+//		getNewLinks_from_s24_najnowszeNotki("files//najnowszenotki_2016.txt");
 		
 		/**
 		 * Parsuje linki HuffingtonPosta ze starego do nowego ('_us_xnox') formatu
@@ -683,7 +689,7 @@ public class Crawler {
 		{
 			parsePageAndAddToDB(postLinks.get(i));
 			System.out.println("DODANO postów " + (i+1) + " z " + postLinks.size());
-			sleep(2000);
+			sleep(1000);
 		}
 	}
 	
@@ -870,7 +876,8 @@ public class Crawler {
 			// Komentarze FB
 			// 8+9
 			
-			manage_comments(site, post);
+//			manage_comments(site, post);
+			manage_salon24_comments(post);
 		}
 		catch(org.jsoup.HttpStatusException e)
 		{
@@ -899,6 +906,81 @@ public class Crawler {
 		{
 			e.printStackTrace();
 		}
+	}
+
+	private static JSONObject get_data_JSONObject_form_salon24_postid(String postid) throws JSONException, IOException
+	{
+		String comments_url = Consts.S24_COMMENTS_START + postid + Consts.S24_COMMENTS_END;
+		JSONObject comments_json = readJsonFromUrl(comments_url);
+		JSONObject first_data = comments_json.getJSONObject("data");
+		return first_data;
+	}
+
+	private static void manage_salon24_comments(Post post) throws IOException, ParseException
+	{
+		try
+		{
+			JSONObject first_data = get_data_JSONObject_form_salon24_postid(post.getSite());
+			JSONObject comments_object = first_data.getJSONObject("comments");
+			JSONArray comments_data_array = comments_object.getJSONArray("data");
+			
+			if(comments_data_array.length() == 0)
+			{
+				System.out.println("nie ma komentarzy");
+				return;
+			}
+			
+			JSONObject users_object = first_data.getJSONObject("users");
+			for(int i = 0; i < comments_data_array.length(); ++i)
+			{
+				get_comment_from_salon24_JSONObject(comments_data_array.getJSONObject(i), users_object, post);
+			}
+		}
+		catch(JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	private static void get_comment_from_salon24_JSONObject(JSONObject comment_object, JSONObject users_object, Post parent_post) throws JSONException, ParseException, IOException
+	{
+		Comment comment = new Comment();
+		
+		comment.setPost(parent_post);
+		
+		String author_id = comment_object.getString("userId");
+		
+		JSONObject author_object = users_object.getJSONObject(author_id);
+		
+		Author author = new Author();
+		author.setName(author_object.getString("nick"));
+		if(!author_object.isNull("url"))
+			author.setLink("http:" + author_object.getString("url"));
+		
+		Author found_author = AM.getAuthorByName(author.getName());
+		if (found_author != null)
+		{
+			author = found_author;
+		}
+		else
+		{
+			if (author.getLink() == null && author.getName() == null)
+			{
+				System.err.println("Autor jest pusty!!!");
+				return;
+			}
+			AM.addAuthor(author);
+			if (author.getId() == 0)
+			{
+				System.err.println("Autor nie zapisal sie!!!");
+				return;
+			}
+		}
+		comment.setAuthor(author);
+		
+		comment.setContent(comment_object.getString("content"));
+		
+		CommentM.addComment(comment);
 	}
 
 	/**
